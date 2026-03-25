@@ -54,6 +54,47 @@ def bow():
     move_head_ud(90)
 
 # =============================
+# 🏠 DRAW HOUSE
+# =============================
+def draw_house():
+    print("🏠 Drawing a house...")
+    speak("I am gripping the pen and drawing a house")
+    # Grip pen (Assuming D4 is the gripper on the right arm)
+    send("Servo(D4, 180)") # Close gripper
+    time.sleep(1)
+    
+    # Arm sequence for drawing a house 
+    # (Assuming D2 is right shoulder, D3 is right bicep)
+    # Move to starting position
+    send("Servo(D2, 90)")
+    send("Servo(D3, 90)")
+    time.sleep(1)
+    
+    # Draw Walls (Square)
+    send("Servo(D2, 110)") # Down
+    time.sleep(0.5)
+    send("Servo(D3, 110)") # Right
+    time.sleep(0.5)
+    send("Servo(D2, 90)")  # Up
+    time.sleep(0.5)
+    send("Servo(D3, 90)")  # Left
+    time.sleep(0.5)
+    
+    # Draw Roof (Triangle)
+    send("Servo(D2, 70)")  # Diagonally up
+    send("Servo(D3, 100)")
+    time.sleep(0.5)
+    send("Servo(D2, 90)")  # Diagonally down
+    send("Servo(D3, 110)")
+    time.sleep(0.5)
+    
+    # Release pen
+    send("Servo(D4, 90)") # Open gripper
+    time.sleep(1)
+    
+    speak("I have finished drawing the house")
+
+# =============================
 # LLM
 # =============================
 def ask_llm(prompt):
@@ -191,8 +232,11 @@ while True:
                     speak("Stopping system")
                     break
 
-                reply = ask_llm(user)
-                speak(reply)
+                if "draw a house" in user.lower():
+                    draw_house()
+                else:
+                    reply = ask_llm(user)
+                    speak(reply)
 
             else:
                 speak("No input detected")
