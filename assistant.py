@@ -31,10 +31,10 @@ def speak(text):
 # SERVO CONTROL
 # =============================
 def move_head_lr(pos):
-    send(f"Servo(D1,{int(pos)})")
+    send(f"Servo(D0,{int(pos)})")
 
 def move_head_ud(pos):
-    send(f"Servo(D0,{int(pos)})")
+    send(f"Servo(D1,{int(pos)})")
 
 def forward():
     send("Forward()")
@@ -54,45 +54,78 @@ def bow():
     move_head_ud(90)
 
 # =============================
-# 🏠 DRAW HOUSE
+# ✍️ DRAW SHAPES
 # =============================
-def draw_house():
-    print("🏠 Drawing a house...")
-    speak("I am gripping the pen and drawing a house")
-    # Grip pen (Assuming D4 is the gripper on the right arm)
-    send("Servo(D4, 180)") # Close gripper
+def draw_shape(shape):
+    print(f"🏠 Drawing a {shape}...")
+    speak(f"I am gripping the pen to draw a {shape}")
+    
+    # Grip pen (Right Gripper is D9)
+    send("Servo(D9, 150)") # Close gripper
+    # Hold pen for at least 3 seconds before starting as requested
+    time.sleep(3)
+    
+    # Arm sequence (Right Upper Arm D7, Right Forearm D8)
+    # Move to starting position (lower shoulder to flat surface)
+    send("Servo(D7, 120)")
+    send("Servo(D8, 90)")
     time.sleep(1)
     
-    # Arm sequence for drawing a house 
-    # (Assuming D2 is right shoulder, D3 is right bicep)
-    # Move to starting position
-    send("Servo(D2, 90)")
-    send("Servo(D3, 90)")
+    if shape == "square":
+        send("Servo(D7, 130)")
+        time.sleep(0.5)
+        send("Servo(D8, 110)")
+        time.sleep(0.5)
+        send("Servo(D7, 110)")
+        time.sleep(0.5)
+        send("Servo(D8, 90)")
+        time.sleep(0.5)
+    elif shape == "rectangle":
+        send("Servo(D7, 140)")
+        time.sleep(0.8)
+        send("Servo(D8, 110)")
+        time.sleep(0.4)
+        send("Servo(D7, 110)")
+        time.sleep(0.8)
+        send("Servo(D8, 90)")
+        time.sleep(0.4)
+    elif shape == "triangle":
+        send("Servo(D7, 130)")
+        send("Servo(D8, 100)")
+        time.sleep(0.6)
+        send("Servo(D7, 110)")
+        send("Servo(D8, 120)")
+        time.sleep(0.6)
+        send("Servo(D7, 110)")
+        send("Servo(D8, 90)")
+        time.sleep(0.6)
+    else: # House
+        # Walls (Square)
+        send("Servo(D7, 130)")
+        time.sleep(0.5)
+        send("Servo(D8, 110)")
+        time.sleep(0.5)
+        send("Servo(D7, 110)")
+        time.sleep(0.5)
+        send("Servo(D8, 90)")
+        time.sleep(0.5)
+        # Roof (Triangle)
+        send("Servo(D7, 90)")
+        send("Servo(D8, 100)")
+        time.sleep(0.5)
+        send("Servo(D7, 110)")
+        send("Servo(D8, 110)")
+        time.sleep(0.5)
+    
+    # Lift pen
+    send("Servo(D7, 90)")
     time.sleep(1)
-    
-    # Draw Walls (Square)
-    send("Servo(D2, 110)") # Down
-    time.sleep(0.5)
-    send("Servo(D3, 110)") # Right
-    time.sleep(0.5)
-    send("Servo(D2, 90)")  # Up
-    time.sleep(0.5)
-    send("Servo(D3, 90)")  # Left
-    time.sleep(0.5)
-    
-    # Draw Roof (Triangle)
-    send("Servo(D2, 70)")  # Diagonally up
-    send("Servo(D3, 100)")
-    time.sleep(0.5)
-    send("Servo(D2, 90)")  # Diagonally down
-    send("Servo(D3, 110)")
-    time.sleep(0.5)
     
     # Release pen
-    send("Servo(D4, 90)") # Open gripper
+    send("Servo(D9, 90)") # Open gripper
     time.sleep(1)
     
-    speak("I have finished drawing the house")
+    speak(f"I have finished drawing the {shape}")
 
 # =============================
 # LLM
@@ -233,7 +266,13 @@ while True:
                     break
 
                 if "draw a house" in user.lower():
-                    draw_house()
+                    draw_shape("house")
+                elif "draw a square" in user.lower():
+                    draw_shape("square")
+                elif "draw a rectangle" in user.lower():
+                    draw_shape("rectangle")
+                elif "draw a triangle" in user.lower():
+                    draw_shape("triangle")
                 else:
                     reply = ask_llm(user)
                     speak(reply)
