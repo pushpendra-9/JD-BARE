@@ -64,9 +64,9 @@ def draw_shape(shape):
     print(f"🏠 Drawing a {shape}...")
     speak(f"I am gripping the pen to draw a {shape}")
     
-    # Initialize arm speeds
-    send("ServoSpeed(D7, 3)")
-    send("ServoSpeed(D8, 3)")
+    # Initialize arm speeds for smooth continuous drawing lines
+    send("ServoSpeed(D7, 2)")
+    send("ServoSpeed(D8, 2)")
     
     # Head looks down at the paper
     send("Servo(D0, 130)") # Look down
@@ -76,94 +76,101 @@ def draw_shape(shape):
     send("Servo(D9, 150)") # Close gripper
     time.sleep(3)
     
-    # Lower pen to paper
-    send("Servo(D7, 120)") # Lower shoulder to table
-    send("Servo(D8, 100)") # Bend elbow slightly
+    # Move to starting pen-down position on the table.
+    # D7 (Shoulder Roll) = 30 (Arm dropped down close to body)
+    # D8 (Elbow Pitch) = 60 (Forearm bent pointing forward to table)
+    send("Servo(D7, 30)")
+    send("Servo(D8, 60)")
     time.sleep(2)
     
-    # Because the paper is static and the arm has limited DOF, 
-    # we draw perfect shapes by having the robot use all its limbs to WALK the shape!
+    # Arm kinematics mapping based on EZ-Builder T-Pose:
+    # D7 controls X-axis (Left/Right sweep). e.g., 20 = Right side, 40 = Left side.
+    # D8 controls Y-axis (Forward/Backward extension). e.g., 30 = further Forward, 60 = pulled Backward.
     if shape == "square":
-        for _ in range(4):
-            send("Forward()")
-            time.sleep(2)
-            send("Stop()")
-            time.sleep(0.5)
-            send("Right()")
-            time.sleep(1.5) # Approximate time for a 90 degree turn
-            send("Stop()")
-            time.sleep(0.5)
+        # Bottom-Left (near body, left side)
+        send("Servo(D7, 40)")
+        send("Servo(D8, 60)")
+        time.sleep(1.5)
+        # Top-Left (extended forward, left side)
+        send("Servo(D7, 40)")
+        send("Servo(D8, 30)")
+        time.sleep(1.5)
+        # Top-Right (extended forward, right side)
+        send("Servo(D7, 20)")
+        send("Servo(D8, 30)")
+        time.sleep(1.5)
+        # Bottom-Right (near body, right side)
+        send("Servo(D7, 20)")
+        send("Servo(D8, 60)")
+        time.sleep(1.5)
+        # Return to Bottom-Left to close square
+        send("Servo(D7, 40)")
+        send("Servo(D8, 60)")
+        time.sleep(1.5)
     elif shape == "rectangle":
-        for _ in range(2):
-            # Long side
-            send("Forward()")
-            time.sleep(3)
-            send("Stop()")
-            time.sleep(0.5)
-            send("Right()")
-            time.sleep(1.5)
-            send("Stop()")
-            time.sleep(0.5)
-            # Short side
-            send("Forward()")
-            time.sleep(1.5)
-            send("Stop()")
-            time.sleep(0.5)
-            send("Right()")
-            time.sleep(1.5)
-            send("Stop()")
-            time.sleep(0.5)
+        send("Servo(D7, 40)")
+        send("Servo(D8, 60)")
+        time.sleep(1.5)
+        send("Servo(D7, 40)")
+        send("Servo(D8, 20)") # Deeper stretch forward
+        time.sleep(1.5)
+        send("Servo(D7, 20)")
+        send("Servo(D8, 20)")
+        time.sleep(1.5)
+        send("Servo(D7, 20)")
+        send("Servo(D8, 60)")
+        time.sleep(1.5)
+        send("Servo(D7, 40)")
+        send("Servo(D8, 60)")
+        time.sleep(1.5)
     elif shape == "triangle":
-        for _ in range(3):
-            send("Forward()")
-            time.sleep(2)
-            send("Stop()")
-            time.sleep(0.5)
-            # 120 degree turn
-            send("Right()")
-            time.sleep(2.0)
-            send("Stop()")
-            time.sleep(0.5)
+        # Bottom-Left
+        send("Servo(D7, 40)")
+        send("Servo(D8, 60)")
+        time.sleep(1.5)
+        # Top-Center (extended forward, middle)
+        send("Servo(D7, 30)")
+        send("Servo(D8, 30)")
+        time.sleep(1.5)
+        # Bottom-Right
+        send("Servo(D7, 20)")
+        send("Servo(D8, 60)")
+        time.sleep(1.5)
+        # Return Bottom-Left to close triangle
+        send("Servo(D7, 40)")
+        send("Servo(D8, 60)")
+        time.sleep(1.5)
     else: # House
         # Base (Square)
-        for _ in range(4):
-            send("Forward()")
-            time.sleep(2)
-            send("Stop()")
-            time.sleep(0.5)
-            send("Right()")
-            time.sleep(1.5)
-            send("Stop()")
-            time.sleep(0.5)
-        # Move forward slightly
-        send("Forward()")
-        time.sleep(2)
-        send("Stop()")
-        time.sleep(0.5)
-        # 45 degree turn
-        send("Right()")
-        time.sleep(0.8)
-        send("Stop()")
-        time.sleep(0.5)
-        # Roof Side 1
-        send("Forward()")
+        send("Servo(D7, 40)")
+        send("Servo(D8, 60)")
         time.sleep(1.5)
-        send("Stop()")
-        time.sleep(0.5)
-        # 90 deg turn at roof peak
-        send("Right()")
+        send("Servo(D7, 40)")
+        send("Servo(D8, 40)")
         time.sleep(1.5)
-        send("Stop()")
-        time.sleep(0.5)
-        # Roof Side 2
-        send("Forward()")
+        send("Servo(D7, 20)")
+        send("Servo(D8, 40)")
         time.sleep(1.5)
-        send("Stop()")
-        time.sleep(0.5)
+        send("Servo(D7, 20)")
+        send("Servo(D8, 60)")
+        time.sleep(1.5)
+        send("Servo(D7, 40)")
+        send("Servo(D8, 60)")
+        time.sleep(1.5)
+        # Roof (from top-left to peak to top-right)
+        send("Servo(D7, 40)")
+        send("Servo(D8, 40)")
+        time.sleep(1.5)
+        send("Servo(D7, 30)")
+        send("Servo(D8, 20)") # Peak
+        time.sleep(1.5)
+        send("Servo(D7, 20)")
+        send("Servo(D8, 40)")
+        time.sleep(1.5)
     
-    # Lift pen, look up, and reset arms
-    send("Servo(D7, 90)")
-    send("Servo(D0, 90)") # Reset head ud
+    # Lift pen safely away from paper, look up
+    send("Servo(D7, 0)") # Tuck arm to side
+    send("Servo(D0, 90)") # Reset head 
     time.sleep(1)
     
     # Release pen
