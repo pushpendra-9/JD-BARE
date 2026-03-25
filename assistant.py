@@ -35,10 +35,10 @@ def speak(text):
 # SERVO CONTROL
 # =============================
 def move_head_lr(pos):
-    send(f"Servo(D0,{int(pos)})")
+    send(f"Servo(D1,{int(pos)})")
 
 def move_head_ud(pos):
-    send(f"Servo(D1,{int(pos)})")
+    send(f"Servo(D0,{int(pos)})")
 
 def forward():
     send("Forward()")
@@ -75,8 +75,8 @@ def draw_shape(shape):
     send("Servo(D14, 90)") # Ankle
     
     # Head looks down at the paper, left arm balances
-    send("Servo(D0, 90)") # Face forward
-    send("Servo(D1, 130)") # Look down
+    send("Servo(D0, 130)") # Look down
+    send("Servo(D1, 90)")  # Face forward
     send("Servo(D4, 110)") # Left arm back
     send("Servo(D5, 90)")
     
@@ -84,72 +84,91 @@ def draw_shape(shape):
     send("Servo(D9, 150)") # Close gripper
     time.sleep(3)
     
-    # Arm sequence (Right Upper Arm D7, Right Forearm D8)
-    # Safe limits (80 to 105) so the arm doesn't swing backward into the body
+    # Arm sequence:
+    # We map D7 to Y-axis (Forward/Backward), 90=Down, 110=Forward
+    # We map D8 to X-axis (Left/Right), 90=Center, 110=Left, 70=Right
     send("Servo(D7, 90)")
     send("Servo(D8, 90)")
     time.sleep(1)
     
     if shape == "square":
-        send("Servo(D7, 85)")
-        send("Servo(D8, 85)")
+        # Path: Bottom-Left -> Top-Left -> Top-Right -> Bottom-Right -> Bottom-Left
+        send("Servo(D7, 90)")
+        send("Servo(D8, 110)")
         time.sleep(1)
-        send("Servo(D8, 105)")
+        send("Servo(D7, 110)")
+        send("Servo(D8, 110)")
         time.sleep(1)
-        send("Servo(D7, 105)")
+        send("Servo(D7, 110)")
+        send("Servo(D8, 70)")
         time.sleep(1)
-        send("Servo(D8, 85)")
+        send("Servo(D7, 90)")
+        send("Servo(D8, 70)")
         time.sleep(1)
-        send("Servo(D7, 85)")
+        send("Servo(D7, 90)")
+        send("Servo(D8, 110)")
         time.sleep(1)
     elif shape == "rectangle":
-        send("Servo(D7, 80)")
-        send("Servo(D8, 80)")
+        send("Servo(D7, 90)")
+        send("Servo(D8, 110)")
         time.sleep(1)
-        send("Servo(D8, 105)")
+        send("Servo(D7, 120)")
+        send("Servo(D8, 110)")
         time.sleep(1)
-        send("Servo(D7, 95)")
+        send("Servo(D7, 120)")
+        send("Servo(D8, 70)")
         time.sleep(1)
-        send("Servo(D8, 80)")
+        send("Servo(D7, 90)")
+        send("Servo(D8, 70)")
         time.sleep(1)
-        send("Servo(D7, 80)")
+        send("Servo(D7, 90)")
+        send("Servo(D8, 110)")
         time.sleep(1)
     elif shape == "triangle":
-        send("Servo(D7, 80)")
+        # Path: Bottom-Left -> Top-Center -> Bottom-Right -> Bottom-Left
+        send("Servo(D7, 90)")
+        send("Servo(D8, 110)")
+        time.sleep(1)
+        send("Servo(D7, 110)")
         send("Servo(D8, 90)")
         time.sleep(1)
-        send("Servo(D7, 100)")
-        send("Servo(D8, 100)")
+        send("Servo(D7, 90)")
+        send("Servo(D8, 70)")
         time.sleep(1)
-        send("Servo(D8, 80)")
-        time.sleep(1)
-        send("Servo(D7, 80)")
-        send("Servo(D8, 90)")
+        send("Servo(D7, 90)")
+        send("Servo(D8, 110)")
         time.sleep(1)
     else: # House
-        # Walls (Square)
+        # Base (Square)
         send("Servo(D7, 90)")
-        send("Servo(D8, 80)")
+        send("Servo(D8, 110)")
         time.sleep(1)
-        send("Servo(D8, 100)")
+        send("Servo(D7, 105)")
+        send("Servo(D8, 110)")
         time.sleep(1)
-        send("Servo(D7, 100)")
-        time.sleep(1)
-        send("Servo(D8, 80)")
+        send("Servo(D7, 105)")
+        send("Servo(D8, 70)")
         time.sleep(1)
         send("Servo(D7, 90)")
+        send("Servo(D8, 70)")
         time.sleep(1)
-        # Roof (Triangle)
-        send("Servo(D7, 80)")
+        send("Servo(D7, 90)")
+        send("Servo(D8, 110)")
+        time.sleep(1)
+        # Roof (Triangle from top-left to middle to top-right)
+        send("Servo(D7, 105)")
+        send("Servo(D8, 110)")
+        time.sleep(1)
+        send("Servo(D7, 120)")
         send("Servo(D8, 90)")
         time.sleep(1)
-        send("Servo(D7, 90)")
-        send("Servo(D8, 100)")
+        send("Servo(D7, 105)")
+        send("Servo(D8, 70)")
         time.sleep(1)
     
     # Lift pen, look up, and reset left arm
     send("Servo(D7, 90)")
-    send("Servo(D1, 90)")
+    send("Servo(D0, 90)") # Reset head ud
     send("Servo(D4, 90)")
     time.sleep(1)
     
