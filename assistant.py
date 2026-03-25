@@ -179,8 +179,25 @@ def ask_llm(prompt):
 # =============================
 # 🎤 VOSK MIC & KEYBOARD
 # =============================
+import threading
+import queue
+
 model = Model(r"D:\JD\model\vosk-model-small-en-us-0.15\vosk-model-small-en-us-0.15")
 recognizer = KaldiRecognizer(model, 16000)
+
+input_queue = queue.Queue()
+
+def keyboard_listener():
+    while True:
+        try:
+            text = sys.stdin.readline().strip()
+            if text:
+                input_queue.put(text)
+        except:
+            break
+
+keyboard_thread = threading.Thread(target=keyboard_listener, daemon=True)
+keyboard_thread.start()
 
 def listen_or_keyboard(duration=5):
     print(f"🎤 Listening for {duration} seconds... (or type your command)")
@@ -206,10 +223,11 @@ def listen_or_keyboard(duration=5):
         start_time = time.time()
         while time.time() - start_time < duration:
             # Check for keyboard input
-            i, o, e = select.select([sys.stdin], [], [], 0.1)
-            if i:
-                keyboard_result = sys.stdin.readline().strip()
+            try:
+                keyboard_result = input_queue.get_nowait()
                 break
+            except queue.Empty:
+                time.sleep(0.1)
 
     text_result = text_result.strip()
     
